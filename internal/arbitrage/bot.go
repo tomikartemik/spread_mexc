@@ -350,6 +350,24 @@ func (b *Bot) closePosition(ctx context.Context, state *SymbolState, reason stri
 	return nil
 }
 
+// CloseAllPositions пытается закрыть все активные позиции (например, при остановке бота).
+func (b *Bot) CloseAllPositions(ctx context.Context) error {
+	for _, state := range b.states {
+		snap := state.Snapshot()
+		if snap.Position == nil {
+			continue
+		}
+		spread := 0.0
+		if snap.MexcPrice > 0 && snap.DexPrice > 0 {
+			spread = calculateSpread(snap.MexcPrice, snap.DexPrice)
+		}
+		if err := b.closePosition(ctx, state, "shutdown", spread); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (b *Bot) computeAmount(state *SymbolState, price float64) (float64, error) {
 	if price <= 0 {
 		return 0, fmt.Errorf("invalid price")
