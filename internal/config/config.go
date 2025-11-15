@@ -33,6 +33,10 @@ type Settings struct {
 	EntryThreshold   float64
 	ExitThreshold    float64
 	StopLoss         float64
+	EnterDelta       float64
+	ConfirmDrop      float64
+	ConfirmDuration  time.Duration
+	MinEntrySpread   float64
 	DecisionInterval time.Duration
 	MexcPollInterval time.Duration
 	DebugPrices      bool
@@ -91,6 +95,10 @@ func Load() (Settings, error) {
 	cfg.EntryThreshold = floatFromEnv("ARBITRAGE_ENTRY_THRESHOLD", 7)
 	cfg.ExitThreshold = floatFromEnv("ARBITRAGE_EXIT_THRESHOLD", 2)
 	cfg.StopLoss = floatFromEnv("ARBITRAGE_STOP_LOSS", 1)
+	cfg.EnterDelta = floatFromEnv("ARBITRAGE_ENTER_DELTA", 2)
+	cfg.ConfirmDrop = floatFromEnv("ARBITRAGE_CONFIRM_DROP", 0.3)
+	cfg.MinEntrySpread = floatFromEnv("ARBITRAGE_MIN_ENTRY_SPREAD", 8)
+	cfg.ConfirmDuration = durationFromEnv("ARBITRAGE_CONFIRM_DURATION", 500*time.Millisecond)
 	cfg.DecisionInterval = durationFromEnv("ARBITRAGE_DECISION_INTERVAL", time.Second)
 	cfg.MexcPollInterval = durationFromEnv("MEXC_PRICE_POLL_INTERVAL", 5*time.Second)
 	cfg.DebugPrices = boolFromEnv("ARBITRAGE_DEBUG_PRICES", false)
@@ -112,9 +120,9 @@ func Load() (Settings, error) {
 
 	cfg.OKX = OKXSettings{
 		BaseURL:      strings.TrimSpace(os.Getenv("OKX_WEB3_BASE_URL")),
-		AccessKey:    strings.TrimSpace(os.Getenv("OKX_WEB3_ACCESS_KEY")),
-		SecretKey:    strings.TrimSpace(os.Getenv("OKX_WEB3_SECRET")),
-		Passphrase:   strings.TrimSpace(os.Getenv("OKX_WEB3_PASSPHRASE")),
+		AccessKey:    firstNonEmpty(os.Getenv("OKX_WEB3_ACCESS_KEY"), os.Getenv("OKX_ACCESS_KEY")),
+		SecretKey:    firstNonEmpty(os.Getenv("OKX_WEB3_SECRET"), os.Getenv("OKX_ACCESS_SECRET")),
+		Passphrase:   firstNonEmpty(os.Getenv("OKX_WEB3_PASSPHRASE"), os.Getenv("OKX_ACCESS_PASSPHRASE")),
 		PollInterval: durationFromEnv("OKX_PRICE_POLL_INTERVAL", 2*time.Second),
 	}
 	if cfg.OKX.BaseURL == "" {
@@ -268,6 +276,16 @@ func durationFromEnv(key string, def time.Duration) time.Duration {
 		return time.Duration(f * float64(time.Second))
 	}
 	return def
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		trimmed := strings.TrimSpace(v)
+		if trimmed != "" {
+			return trimmed
+		}
+	}
+	return ""
 }
 
 var envOnce sync.Once

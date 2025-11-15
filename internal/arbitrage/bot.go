@@ -222,20 +222,26 @@ func (b *Bot) evaluateSymbol(ctx context.Context, state *SymbolState) {
 		log.Printf("[DEBUG] %s Dex=%.6f Mexc=%.6f Spread=%.2f%%", state.MexcSymbol, snap.DexPrice, snap.MexcPrice, spread)
 	}
 
+	absolute := math.Abs(spread)
+
 	if snap.Position == nil {
-		if math.Abs(spread) >= b.cfg.EntryThreshold {
+		if absolute >= b.cfg.EntryThreshold {
 			dir := directionShort
 			if spread < 0 {
 				dir = directionLong
 			}
-			if err := b.openPosition(ctx, state, dir, spread, snap.MexcPrice); err != nil {
-				log.Printf("open %s failed: %v", state.MexcSymbol, err)
+			if state.ShouldEnter(absolute, time.Now(), b.cfg) {
+				if err := b.openPosition(ctx, state, dir, spread, snap.MexcPrice); err != nil {
+					log.Printf("open %s failed: %v", state.MexcSymbol, err)
+				}
 			}
+		} else {
+			state.ResetTracking()
 		}
 		return
 	}
 
-	if math.Abs(spread) <= b.cfg.ExitThreshold {
+	if absolute <= b.cfg.ExitThreshold {
 		if err := b.closePosition(ctx, state, "target reached", spread); err != nil {
 			log.Printf("close %s failed: %v", state.MexcSymbol, err)
 		}
