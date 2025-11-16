@@ -1,17 +1,94 @@
 [
   {
-    "mexc": "RAIL/USDT:USDT",
-    "mexc_contract": "RAIL_USDT",
-    "chain": "ethereum",
-    "chainIndex": "1",
-    "address": "0xe76c6c83af64e4c60245d8c7de953df673a7a33d"
-  },
-  {
-    "mexc": "PAYAI/USDT:USDT",
-    "mexc_contract": "PAYAI_USDT",
+    "mexc": "WOJAKONX/USDT:USDT",
+    "mexc_contract": "WOJAKONX_USDT",
     "chain": "solana",
     "chainIndex": "501",
-    "address": "E7NgL19JbN8BhUDgWjkH8MtnbhJoaGaWJqosxZZepump"
+    "address": "8J69rbLTzWWgUJziFY8jeu5tDwEPBwUz4pKBMr5rpump"
+  },
+  {
+    "mexc": "MEMERUSH /USDT:USDT",
+    "mexc_contract": "MEMERUSH_USDT",
+    "chain": "bsc",
+    "chainIndex": "56",
+    "address": "0x4444b1e4de34df52cf91e30cc7c0336ee03d7c1b"
+  },
+  {
+    "mexc": "1 /USDT:USDT",
+    "mexc_contract": "1_USDT",
+    "chain": "solana",
+    "chainIndex": "501",
+    "address": "GMvCfcZg8YvkkQmwDaAzCtHDrrEtgE74nQpQ7xNabonk"
+  },
+  {
+    "mexc": "DREAMSX402 /USDT:USDT",
+    "mexc_contract": "DREAMSX402_USDT",
+    "chain": "solana",
+    "chainIndex": "501",
+    "address": "GMzuntWYJLpNuCizrSR7ZXggiMdDzTNiEmSNHHunpump"
+  },
+  {
+    "mexc": "LMTS/USDT:USDT",
+    "mexc_contract": "LMTS_USDT",
+    "chain": "base",
+    "chainIndex": "8453",
+    "address": "0x9eadbe35f3ee3bf3e28180070c429298a1b02f93"
+  },
+  {
+    "mexc": "TITN/USDT:USDT",
+    "mexc_contract": "TITN_USDT",
+    "chain": "base",
+    "chainIndex": "8453",
+    "address": "0xe62bfbe57763ec24c0f130426f34dbce11fc5b06"
+  },
+  {
+    "mexc": "POP/USDT:USDT",
+    "mexc_contract": "POP_USDT",
+    "chain": "bsc",
+    "chainIndex": "56",
+    "address": "0xa3cfb853339b77f385b994799b015cb04b208fe6"
+  },
+  {
+    "mexc": "PAAL/USDT:USDT",
+    "mexc_contract": "PAAL_USDT",
+    "chain": "ethereum",
+    "chainIndex": "1",
+    "address": "0x14fee680690900ba0cccfc76ad70fd1b95d10e16"
+  },
+  {
+    "mexc": "NUMI/USDT:USDT",
+    "mexc_contract": "NUMI_USDT",
+    "chain": "bsc",
+    "chainIndex": "56",
+    "address": "0xc61eb549acf4a05ed6e3fe0966f5e213b23541ce"
+  },
+  {
+    "mexc": "PING/USDT:USDT",
+    "mexc_contract": "PING_USDT",
+    "chain": "base",
+    "chainIndex": "8453",
+    "address": "0xd85c31854c2b0fb40aaa9e2fc4da23c21f829d46"
+  },
+  {
+    "mexc": "BELIEVE/USDT:USDT",
+    "mexc_contract": "BELIEVE_USDT",
+    "chain": "solana",
+    "chainIndex": "501",
+    "address": "BLVxek8YMXUQhcKmMvrFTrzh5FXg8ec88Crp6otEaCMf"
+  },
+  {
+    "mexc": "LITKEY/USDT:USDT",
+    "mexc_contract": "LITKEY_USDT",
+    "chain": "base",
+    "chainIndex": "8453",
+    "address": "0xf732a566121fa6362e9e0fbdd6d66e5c8c925e49"
+  },
+  {
+    "mexc": "BNBHOLDER/USDT:USDT",
+    "mexc_contract": "BNBHOLDER_USDT",
+    "chain": "bsc",
+    "chainIndex": "56",
+    "address": "0x44440f83419de123d7d411187adb9962db017d03"
   },
   {
     "mexc": "BAGWORK/USDT:USDT",
@@ -20,18 +97,46 @@
     "chainIndex": "501",
     "address": "7Pnqg1S6MYrL6AP1ZXcToTHfdBbTB77ze6Y33qBBpump"
   },
-   {
-    "mexc": "BULLISH/USDT:USDT",
-    "mexc_contract": "BULLISH_USDT",
-     "chain": "solana",
-     "chainIndex": "501",
-    "address": "C2omVhcvt3DDY77S2KZzawFJQeETZofgZ4eNWWkXpump"
-  },
   {
-    "mexc": "AVICI/USDT:USDT",
-    "mexc_contract": "AVICI_USDT",
+    "mexc": "FUNSOL/USDT:USDT",
+    "mexc_contract": "FUNSOL_USDT",
     "chain": "solana",
     "chainIndex": "501",
-    "address": "BANKJmvhT8tiJRsBSS1n2HryMBPvT5Ze4HU95DUAmeta"
+    "address": "G849nDx4r1vwjibbmpjkZ6pbDWwaMouhkWLq1o8Z5FUN"
+  },
+  {
+    "mexc": "CHILLHOUSE/USDT:USDT",
+    "mexc_contract": "CHILLHOUSE_USDT",
+    "chain": "solana",
+    "chainIndex": "501",
+    "address": "GkyPYa7NnCFbduLknCfBfP7p8564X1VZhwZYJ6CZpump"
+  },
+  {
+    "mexc": "BEAT/USDT:USDT",
+    "mexc_contract": "BEAT_USDT",
+    "chain": "bsc",
+    "chainIndex": "56",
+    "address": "0xcf3232b85b43bca90e51d38cc06cc8bb8c8a3e36"
+  },
+  {
+    "mexc": "CDL/USDT:USDT",
+    "mexc_contract": "BEAT_USDT",
+    "chain": "bsc",
+    "chainIndex": "56",
+    "address": "0x84575b87395c970f1f48e87d87a8db36ed653716"
+  },
+  {
+    "mexc": "GP/USDT:USDT",
+    "mexc_contract": "GP_USDT",
+    "chain": "solana",
+    "chainIndex": "501",
+    "address": "31k88G5Mq7ptbRDf3AM13HAq6wRQHXHikR8hik7wPygk"
+  },
+  {
+    "mexc": "CARDS/USDT:USDT",
+    "mexc_contract": "CARDS_USDT",
+    "chain": "solana",
+    "chainIndex": "501",
+    "address": "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp"
   }
 ]

@@ -38,6 +38,7 @@ type Settings struct {
 	ConfirmDrop         float64
 	ConfirmDuration     time.Duration
 	MinEntrySpread      float64
+	InitialBalance      float64
 	DecisionInterval    time.Duration
 	MexcPollInterval    time.Duration
 	MexcPriceDelay      time.Duration
@@ -105,6 +106,7 @@ func Load() (Settings, error) {
 	cfg.EnterDelta = floatFromEnv("ARBITRAGE_ENTER_DELTA", 2)
 	cfg.ConfirmDrop = floatFromEnv("ARBITRAGE_CONFIRM_DROP", 0.3)
 	cfg.MinEntrySpread = floatFromEnv("ARBITRAGE_MIN_ENTRY_SPREAD", 8)
+	cfg.InitialBalance = floatFromEnv("ARBITRAGE_INITIAL_BALANCE", 0)
 	cfg.ConfirmDuration = durationFromEnv("ARBITRAGE_CONFIRM_DURATION", 500*time.Millisecond)
 	cfg.DecisionInterval = durationFromEnv("ARBITRAGE_DECISION_INTERVAL", time.Second)
 	cfg.MexcPollInterval = durationFromEnv("MEXC_PRICE_POLL_INTERVAL", 5*time.Second)

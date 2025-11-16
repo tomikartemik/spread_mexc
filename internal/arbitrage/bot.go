@@ -32,6 +32,7 @@ type Bot struct {
 	notifier  notify.Sender
 	okxClient *okx.Client
 	tokens    []okx.Token
+	tracker   *PnLTracker
 }
 
 // NewBot initializes state and fetches contract metadata.
@@ -82,6 +83,7 @@ func NewBot(cfg config.Settings) (*Bot, error) {
 		notifier:  notifier,
 		okxClient: okxClient,
 		tokens:    tokens,
+		tracker:   NewPnLTracker(cfg.InitialBalance),
 	}, nil
 }
 
@@ -90,9 +92,14 @@ func (b *Bot) Run(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	errCh := make(chan error, 3)
+	workerCount := 3
+	if b.notifier != nil && b.tracker != nil {
+		workerCount++
+	}
+
+	errCh := make(chan error, workerCount)
 	var wg sync.WaitGroup
-	wg.Add(3)
+	wg.Add(workerCount)
 
 	go func() {
 		defer wg.Done()
@@ -117,6 +124,16 @@ func (b *Bot) Run(ctx context.Context) error {
 			cancel()
 		}
 	}()
+
+	if b.notifier != nil && b.tracker != nil {
+		go func() {
+			defer wg.Done()
+			if err := b.dailyReportLoop(ctx); err != nil && !errors.Is(err, context.Canceled) {
+				errCh <- fmt.Errorf("report loop: %w", err)
+				cancel()
+			}
+		}()
+	}
 
 	var runErr error
 	select {
@@ -397,8 +414,12 @@ func (b *Bot) closePosition(ctx context.Context, state *SymbolState, reason stri
 	}
 
 	state.ClearPosition()
-	log.Printf("%s closed %s (%s)", state.MexcSymbol, pos.Direction, reason)
-	b.notifyf("%s: закрываю %s (%s). Цена %.6f, объём %.6f, спред %.2f%%", state.MexcSymbol, pos.Direction, reason, snap.MexcPrice, pos.Amount, spread)
+	pnl := 0.0
+	if b.tracker != nil {
+		pnl = b.tracker.RecordTrade(state.MexcSymbol, pos.Direction, pos.EntryPrice, snap.MexcPrice, pos.Amount, state.Contract.ContractSize, spread)
+	}
+	log.Printf("%s closed %s (%s) pnl %+.4f", state.MexcSymbol, pos.Direction, reason, pnl)
+	b.notifyf("%s: закрываю %s (%s). Цена %.6f, объём %.6f, спред %.2f%%, pnl %+.4f", state.MexcSymbol, pos.Direction, reason, snap.MexcPrice, pos.Amount, spread, pnl)
 	return nil
 }
 
@@ -476,4 +497,30 @@ func (b *Bot) notifyf(format string, args ...interface{}) {
 			log.Printf("notify send failed: %v", err)
 		}
 	}(message)
+}
+
+func (b *Bot) dailyReportLoop(ctx context.Context) error {
+	if b.notifier == nil || b.tracker == nil {
+		<-ctx.Done()
+		return ctx.Err()
+	}
+	next := nextReportTime(time.Now())
+	timer := time.NewTimer(time.Until(next))
+	defer timer.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timer.C:
+			report := b.tracker.BuildReport(next)
+			ctxNotify, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			if err := b.notifier.Notify(ctxNotify, report); err != nil {
+				log.Printf("failed to send daily report: %v", err)
+			}
+			cancel()
+			b.tracker.ResetDaily(next)
+			next = next.Add(24 * time.Hour)
+			timer.Reset(time.Until(next))
+		}
+	}
 }
