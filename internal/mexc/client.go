@@ -182,10 +182,20 @@ func (c *Client) request(ctx context.Context, method, path string, params url.Va
 
 	if resp.StatusCode >= 400 {
 		bodyBytes, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("http %d: %s", resp.StatusCode, string(bodyBytes))
+		return nil, &StatusError{Code: resp.StatusCode, Body: string(bodyBytes)}
 	}
 
 	return io.ReadAll(resp.Body)
+}
+
+// StatusError описывает HTTP-ответ MEXC с ошибкой.
+type StatusError struct {
+	Code int
+	Body string
+}
+
+func (e *StatusError) Error() string {
+	return fmt.Sprintf("http %d: %s", e.Code, e.Body)
 }
 
 func buildHeaders(includeAuth bool, body []byte, token string) map[string]string {

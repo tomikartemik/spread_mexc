@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"net/http"
 	"sync"
 	"time"
 
@@ -162,9 +163,7 @@ func (b *Bot) refreshMexcPrices(ctx context.Context) error {
 		go func() {
 			defer wg.Done()
 			for state := range jobs {
-				reqCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
-				price, err := b.client.TickerPrice(reqCtx, state.RestSymbol)
-				cancel()
+				price, err := b.fetchMexcPriceWithRetry(ctx, state.RestSymbol)
 				if err != nil {
 					log.Printf("failed to fetch price for %s: %v", state.RestSymbol, err)
 					continue
@@ -188,6 +187,30 @@ sendLoop:
 	close(jobs)
 	wg.Wait()
 	return nil
+}
+
+func (b *Bot) fetchMexcPriceWithRetry(ctx context.Context, symbol string) (float64, error) {
+	delay := b.cfg.MexcPriceRetryDelay
+	var lastErr error
+	for attempt := 1; attempt <= b.cfg.MexcPriceMaxRetries; attempt++ {
+		reqCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
+		price, err := b.client.TickerPrice(reqCtx, symbol)
+		cancel()
+		if err == nil {
+			return price, nil
+		}
+		lastErr = err
+		var se *mexc.StatusError
+		if errors.As(err, &se) {
+			if (se.Code == http.StatusTooManyRequests || se.Code == http.StatusForbidden) && attempt < b.cfg.MexcPriceMaxRetries {
+				time.Sleep(delay)
+				delay *= 2
+				continue
+			}
+		}
+		break
+	}
+	return 0, lastErr
 }
 
 func (b *Bot) okxLoop(ctx context.Context) error {

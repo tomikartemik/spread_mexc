@@ -26,26 +26,28 @@ type Symbol struct {
 
 // Settings holds runtime configuration derived from environment variables.
 type Settings struct {
-	MexcAuthToken    string
-	MexcBaseURL      string
-	MexcTimeout      time.Duration
-	QuoteSize        float64
-	Leverage         int
-	EntryThreshold   float64
-	ExitThreshold    float64
-	StopLoss         float64
-	EnterDelta       float64
-	ConfirmDrop      float64
-	ConfirmDuration  time.Duration
-	MinEntrySpread   float64
-	DecisionInterval time.Duration
-	MexcPollInterval time.Duration
-	MexcPriceDelay   time.Duration
-	MexcPriceWorkers int
-	DebugPrices      bool
-	Symbols          []ResolvedSymbol
-	Telegram         *TelegramSettings
-	OKX              OKXSettings
+	MexcAuthToken       string
+	MexcBaseURL         string
+	MexcTimeout         time.Duration
+	QuoteSize           float64
+	Leverage            int
+	EntryThreshold      float64
+	ExitThreshold       float64
+	StopLoss            float64
+	EnterDelta          float64
+	ConfirmDrop         float64
+	ConfirmDuration     time.Duration
+	MinEntrySpread      float64
+	DecisionInterval    time.Duration
+	MexcPollInterval    time.Duration
+	MexcPriceDelay      time.Duration
+	MexcPriceWorkers    int
+	MexcPriceMaxRetries int
+	MexcPriceRetryDelay time.Duration
+	DebugPrices         bool
+	Symbols             []ResolvedSymbol
+	Telegram            *TelegramSettings
+	OKX                 OKXSettings
 }
 
 // TelegramSettings описывает параметры уведомлений в Telegram.
@@ -107,9 +109,17 @@ func Load() (Settings, error) {
 	cfg.DecisionInterval = durationFromEnv("ARBITRAGE_DECISION_INTERVAL", time.Second)
 	cfg.MexcPollInterval = durationFromEnv("MEXC_PRICE_POLL_INTERVAL", 5*time.Second)
 	cfg.MexcPriceDelay = durationFromEnv("MEXC_PRICE_DELAY", 0)
-	cfg.MexcPriceWorkers = intFromEnv("MEXC_PRICE_WORKERS", 8)
+	cfg.MexcPriceWorkers = intFromEnv("MEXC_PRICE_WORKERS", 4)
 	if cfg.MexcPriceWorkers < 1 {
 		cfg.MexcPriceWorkers = 1
+	}
+	cfg.MexcPriceMaxRetries = intFromEnv("MEXC_PRICE_MAX_RETRIES", 3)
+	if cfg.MexcPriceMaxRetries < 1 {
+		cfg.MexcPriceMaxRetries = 1
+	}
+	cfg.MexcPriceRetryDelay = durationFromEnv("MEXC_PRICE_RETRY_DELAY", 500*time.Millisecond)
+	if cfg.MexcPriceRetryDelay <= 0 {
+		cfg.MexcPriceRetryDelay = 500 * time.Millisecond
 	}
 	cfg.DebugPrices = boolFromEnv("ARBITRAGE_DEBUG_PRICES", false)
 
