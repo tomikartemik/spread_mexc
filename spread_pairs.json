@@ -7,21 +7,21 @@
     "address": "8J69rbLTzWWgUJziFY8jeu5tDwEPBwUz4pKBMr5rpump"
   },
   {
-    "mexc": "MEMERUSH /USDT:USDT",
+    "mexc": "MEMERUSH/USDT:USDT",
     "mexc_contract": "MEMERUSH_USDT",
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0x4444b1e4de34df52cf91e30cc7c0336ee03d7c1b"
   },
   {
-    "mexc": "1 /USDT:USDT",
+    "mexc": "1/USDT:USDT",
     "mexc_contract": "1_USDT",
     "chain": "solana",
     "chainIndex": "501",
     "address": "GMvCfcZg8YvkkQmwDaAzCtHDrrEtgE74nQpQ7xNabonk"
   },
   {
-    "mexc": "DREAMSX402 /USDT:USDT",
+    "mexc": "DREAMSX402/USDT:USDT",
     "mexc_contract": "DREAMSX402_USDT",
     "chain": "solana",
     "chainIndex": "501",
@@ -138,5 +138,12 @@
     "chain": "solana",
     "chainIndex": "501",
     "address": "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp"
+  },
+  {
+    "mexc": "BLOCK/USDT:USDT",
+    "mexc_contract": "BLOCK_USDT",
+    "chain": "ethereum",
+    "chainIndex": "1",
+    "address": "0xcab84bc21f9092167fcfe0ea60f5ce053ab39a1e"
   }
 ]

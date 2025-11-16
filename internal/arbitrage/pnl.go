@@ -109,6 +109,12 @@ func (p *PnLTracker) ResetDaily(now time.Time) {
 	p.lastReset = now
 }
 
+func (p *PnLTracker) CurrentBalance() float64 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.balance
+}
+
 func nextReportTime(now time.Time) time.Time {
 	loc := now.Location()
 	next := time.Date(now.Year(), now.Month(), now.Day(), 1, 0, 0, 0, loc)

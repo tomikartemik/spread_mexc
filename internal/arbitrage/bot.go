@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -371,7 +372,7 @@ func (b *Bot) openPosition(ctx context.Context, state *SymbolState, dir Directio
 		OpenedAt:    time.Now(),
 	})
 	log.Printf("%s opened %s at %.6f amount %.6f spread %.2f%%", state.MexcSymbol, dir, price, amount, spread)
-	b.notifyf("%s: открываю %s. Цена %.6f, объём %.6f, спред %.2f%%, плечо x%d", state.MexcSymbol, dir, price, amount, spread, b.cfg.Leverage)
+	b.notifyf(b.formatOpenMessage(state, dir, price, amount, spread))
 	return nil
 }
 
@@ -419,7 +420,7 @@ func (b *Bot) closePosition(ctx context.Context, state *SymbolState, reason stri
 		pnl = b.tracker.RecordTrade(state.MexcSymbol, pos.Direction, pos.EntryPrice, snap.MexcPrice, pos.Amount, state.Contract.ContractSize, spread)
 	}
 	log.Printf("%s closed %s (%s) pnl %+.4f", state.MexcSymbol, pos.Direction, reason, pnl)
-	b.notifyf("%s: закрываю %s (%s). Цена %.6f, объём %.6f, спред %.2f%%, pnl %+.4f", state.MexcSymbol, pos.Direction, reason, snap.MexcPrice, pos.Amount, spread, pnl)
+	b.notifyf(b.formatCloseMessage(state, pos, snap.MexcPrice, spread, reason, pnl))
 	return nil
 }
 
@@ -489,7 +490,10 @@ func (b *Bot) notifyf(format string, args ...interface{}) {
 	if b.notifier == nil {
 		return
 	}
-	message := fmt.Sprintf(format, args...)
+	message := format
+	if len(args) > 0 {
+		message = fmt.Sprintf(format, args...)
+	}
 	go func(msg string) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
@@ -523,4 +527,57 @@ func (b *Bot) dailyReportLoop(ctx context.Context) error {
 			timer.Reset(time.Until(next))
 		}
 	}
+}
+
+func (b *Bot) formatOpenMessage(state *SymbolState, dir Direction, price, amount, spread float64) string {
+	var builder strings.Builder
+	emoji := "🔔"
+	builder.WriteString(fmt.Sprintf("%s Открыт %s\n", emoji, strings.ToUpper(string(dir))))
+	builder.WriteString(fmt.Sprintf("• Инструмент: %s\n", state.RestSymbol))
+	builder.WriteString(fmt.Sprintf("• Размер: %.4f\n", amount))
+	builder.WriteString(fmt.Sprintf("• Вход: %.6f\n", price))
+	builder.WriteString(fmt.Sprintf("• Спред входа: %.2f%%\n", spread))
+	notional := price * amount * state.Contract.ContractSize
+	builder.WriteString(fmt.Sprintf("• Сумма входа: %.2f USDT\n", notional))
+	builder.WriteString(fmt.Sprintf("• Плечо: x%d\n", b.cfg.Leverage))
+	if line := b.balanceLine(); line != "" {
+		builder.WriteString(line)
+	}
+	return builder.String()
+}
+
+func (b *Bot) formatCloseMessage(state *SymbolState, pos *Position, exitPrice, exitSpread float64, reason string, pnl float64) string {
+	var builder strings.Builder
+	emoji := "❌"
+	if pnl >= 0 {
+		emoji = "✅"
+	}
+	builder.WriteString(fmt.Sprintf("%s Закрыт %s\n", emoji, strings.ToUpper(string(pos.Direction))))
+	builder.WriteString(fmt.Sprintf("• Инструмент: %s\n", state.RestSymbol))
+	builder.WriteString(fmt.Sprintf("• Размер: %.4f\n", pos.Amount))
+	builder.WriteString(fmt.Sprintf("• Вход: %.6f\n", pos.EntryPrice))
+	builder.WriteString(fmt.Sprintf("• Выход: %.6f\n", exitPrice))
+	builder.WriteString(fmt.Sprintf("• Спред входа: %.2f%%\n", pos.EntrySpread))
+	builder.WriteString(fmt.Sprintf("• Спред выхода: %.2f%%\n", exitSpread))
+	entryNotional := pos.EntryPrice * pos.Amount * state.Contract.ContractSize
+	exitNotional := exitPrice * pos.Amount * state.Contract.ContractSize
+	builder.WriteString(fmt.Sprintf("• Сумма входа: %.2f USDT\n", entryNotional))
+	builder.WriteString(fmt.Sprintf("• Сумма выхода: %.2f USDT\n", exitNotional))
+	change := (exitPrice - pos.EntryPrice) / pos.EntryPrice * 100
+	if pos.Direction == directionShort {
+		change = -change
+	}
+	builder.WriteString(fmt.Sprintf("• PnL: %+.4f USDT (%+.3f%%)\n", pnl, change))
+	builder.WriteString(fmt.Sprintf("• Причина: %s\n", reason))
+	if line := b.balanceLine(); line != "" {
+		builder.WriteString(line)
+	}
+	return builder.String()
+}
+
+func (b *Bot) balanceLine() string {
+	if b.tracker == nil {
+		return ""
+	}
+	return fmt.Sprintf("Баланс: %.2f USDT\n", b.tracker.CurrentBalance())
 }
