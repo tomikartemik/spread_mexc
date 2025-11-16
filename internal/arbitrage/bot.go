@@ -64,7 +64,7 @@ func NewBot(cfg config.Settings) (*Bot, error) {
 		notifier = notify.NewTelegram(cfg.Telegram.BotToken, cfg.Telegram.ChatID)
 	}
 
-	okxClient := okx.New(cfg.OKX.BaseURL, cfg.OKX.AccessKey, cfg.OKX.SecretKey, cfg.OKX.Passphrase, 10*time.Second)
+	okxClient := okx.New(cfg.OKX.BaseURL, cfg.OKX.AccessKey, cfg.OKX.SecretKey, cfg.OKX.Passphrase, 10*time.Second, cfg.OKX.RequestDelay, cfg.OKX.MaxRetries)
 	tokens := make([]okx.Token, 0, len(states))
 	for _, st := range states {
 		tokens = append(tokens, okx.Token{
@@ -170,6 +170,9 @@ func (b *Bot) refreshMexcPrices(ctx context.Context) error {
 					continue
 				}
 				state.UpdateMexcPrice(price)
+				if b.cfg.MexcPriceDelay > 0 {
+					time.Sleep(b.cfg.MexcPriceDelay)
+				}
 			}
 		}()
 	}

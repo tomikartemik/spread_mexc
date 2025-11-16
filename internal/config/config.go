@@ -40,6 +40,7 @@ type Settings struct {
 	MinEntrySpread   float64
 	DecisionInterval time.Duration
 	MexcPollInterval time.Duration
+	MexcPriceDelay   time.Duration
 	MexcPriceWorkers int
 	DebugPrices      bool
 	Symbols          []ResolvedSymbol
@@ -60,6 +61,8 @@ type OKXSettings struct {
 	SecretKey    string
 	Passphrase   string
 	PollInterval time.Duration
+	RequestDelay time.Duration
+	MaxRetries   int
 }
 
 // ResolvedSymbol contains derived fields used by the trading engine.
@@ -103,6 +106,7 @@ func Load() (Settings, error) {
 	cfg.ConfirmDuration = durationFromEnv("ARBITRAGE_CONFIRM_DURATION", 500*time.Millisecond)
 	cfg.DecisionInterval = durationFromEnv("ARBITRAGE_DECISION_INTERVAL", time.Second)
 	cfg.MexcPollInterval = durationFromEnv("MEXC_PRICE_POLL_INTERVAL", 5*time.Second)
+	cfg.MexcPriceDelay = durationFromEnv("MEXC_PRICE_DELAY", 0)
 	cfg.MexcPriceWorkers = intFromEnv("MEXC_PRICE_WORKERS", 8)
 	if cfg.MexcPriceWorkers < 1 {
 		cfg.MexcPriceWorkers = 1
@@ -130,12 +134,20 @@ func Load() (Settings, error) {
 		SecretKey:    firstNonEmpty(os.Getenv("OKX_WEB3_SECRET"), os.Getenv("OKX_ACCESS_SECRET")),
 		Passphrase:   firstNonEmpty(os.Getenv("OKX_WEB3_PASSPHRASE"), os.Getenv("OKX_ACCESS_PASSPHRASE")),
 		PollInterval: durationFromEnv("OKX_PRICE_POLL_INTERVAL", 2*time.Second),
+		RequestDelay: durationFromEnv("OKX_PRICE_REQUEST_DELAY", 200*time.Millisecond),
+		MaxRetries:   intFromEnv("OKX_PRICE_MAX_RETRIES", 3),
 	}
 	if cfg.OKX.BaseURL == "" {
 		cfg.OKX.BaseURL = "https://web3.okx.com"
 	}
 	if cfg.OKX.PollInterval <= 0 {
 		cfg.OKX.PollInterval = 2 * time.Second
+	}
+	if cfg.OKX.RequestDelay < 0 {
+		cfg.OKX.RequestDelay = 0
+	}
+	if cfg.OKX.MaxRetries < 1 {
+		cfg.OKX.MaxRetries = 1
 	}
 	if cfg.OKX.AccessKey == "" || cfg.OKX.SecretKey == "" || cfg.OKX.Passphrase == "" {
 		return cfg, errors.New("OKX_WEB3_ACCESS_KEY/SECRET/PASSPHRASE are required")

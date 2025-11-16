@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -23,6 +24,8 @@ type Client struct {
 	secretKey  string
 	passphrase string
 	httpClient *http.Client
+	batchDelay time.Duration
+	maxRetries int
 }
 
 // Token описывает запрос цены.
@@ -33,9 +36,12 @@ type Token struct {
 }
 
 // New создаёт клиент OKX.
-func New(baseURL, accessKey, secretKey, passphrase string, timeout time.Duration) *Client {
+func New(baseURL, accessKey, secretKey, passphrase string, timeout time.Duration, batchDelay time.Duration, maxRetries int) *Client {
 	if timeout <= 0 {
 		timeout = 10 * time.Second
+	}
+	if maxRetries < 1 {
+		maxRetries = 1
 	}
 	return &Client{
 		baseURL:    baseURL,
@@ -43,6 +49,8 @@ func New(baseURL, accessKey, secretKey, passphrase string, timeout time.Duration
 		secretKey:  secretKey,
 		passphrase: passphrase,
 		httpClient: &http.Client{Timeout: timeout},
+		batchDelay: batchDelay,
+		maxRetries: maxRetries,
 	}
 }
 
@@ -60,18 +68,44 @@ func (c *Client) FetchPrices(ctx context.Context, tokens []Token) (map[string]fl
 			end = len(tokens)
 		}
 		chunk := tokens[start:end]
-		batchPrices, err := c.fetchBatch(ctx, chunk)
+		batchPrices, err := c.fetchBatchWithRetry(ctx, chunk)
 		if err != nil {
 			return nil, err
 		}
 		for k, v := range batchPrices {
 			result[k] = v
 		}
+		if c.batchDelay > 0 && end < len(tokens) {
+			time.Sleep(c.batchDelay)
+		}
 	}
 	return result, nil
 }
 
-func (c *Client) fetchBatch(ctx context.Context, tokens []Token) (map[string]float64, error) {
+func (c *Client) fetchBatchWithRetry(ctx context.Context, tokens []Token) (map[string]float64, error) {
+	var lastErr error
+	backoff := c.batchDelay
+	if backoff <= 0 {
+		backoff = 200 * time.Millisecond
+	}
+	for attempt := 1; attempt <= c.maxRetries; attempt++ {
+		prices, err := c.fetchBatchOnce(ctx, tokens)
+		if err == nil {
+			return prices, nil
+		}
+		lastErr = err
+		var se *statusError
+		if errors.As(err, &se) && se.Code == http.StatusTooManyRequests && attempt < c.maxRetries {
+			time.Sleep(backoff)
+			backoff *= 2
+			continue
+		}
+		break
+	}
+	return nil, lastErr
+}
+
+func (c *Client) fetchBatchOnce(ctx context.Context, tokens []Token) (map[string]float64, error) {
 	reqItems := make([]map[string]string, 0, len(tokens))
 	for _, t := range tokens {
 		if t.ChainIndex == "" || t.Address == "" {
@@ -110,7 +144,7 @@ func (c *Client) fetchBatch(ctx context.Context, tokens []Token) (map[string]flo
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("okx http %d", resp.StatusCode)
+		return nil, &statusError{Code: resp.StatusCode}
 	}
 
 	var decoded struct {
@@ -140,6 +174,14 @@ func (c *Client) fetchBatch(ctx context.Context, tokens []Token) (map[string]flo
 		result[key(item.ChainIndex, item.Address)] = price
 	}
 	return result, nil
+}
+
+type statusError struct {
+	Code int
+}
+
+func (e *statusError) Error() string {
+	return fmt.Sprintf("okx http %d", e.Code)
 }
 
 type priceItem struct {

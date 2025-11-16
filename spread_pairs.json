@@ -98,13 +98,6 @@
     "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
   },
   {
-    "mexc": "BNB/USDT:USDT",
-    "mexc_contract": "BNB_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x3ba4c387f786bfee076a58914f5bd38d668b42c3"
-  },
-  {
     "mexc": "LA/USDT:USDT",
     "mexc_contract": "LA_USDT",
     "chain": "ethereum",
@@ -124,13 +117,6 @@
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0xf8a0bf9cf54bb92f17374d9e9a321e6a111a51bd"
-  },
-  {
-    "mexc": "LINK/USDT:USDT",
-    "mexc_contract": "LINK_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39"
   },
   {
     "mexc": "LINK/USDT:USDT",
@@ -182,13 +168,6 @@
     "address": "0xbf5140a22578168fd562dccf235e5d43a02ce9b1"
   },
   {
-    "mexc": "UNI/USDT:USDT",
-    "mexc_contract": "UNI_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xb33eaad8d922b1083446dc23f610c2567fb5180f"
-  },
-  {
     "mexc": "TRB/USDT:USDT",
     "mexc_contract": "TRB_USDT",
     "chain": "ethereum",
@@ -236,13 +215,6 @@
     "chain": "ethereum",
     "chainIndex": "1",
     "address": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9"
-  },
-  {
-    "mexc": "AAVE/USDT:USDT",
-    "mexc_contract": "AAVE_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xd6df932a45c0f255f85145f286ea0b292b21c90b"
   },
   {
     "mexc": "ARB/USDT:USDT",
@@ -560,13 +532,6 @@
     "address": "0xe48a3d7d0bc88d552f730b62c006bc925eadb9ee"
   },
   {
-    "mexc": "FXS/USDT:USDT",
-    "mexc_contract": "FXS_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x1a3acf6d19267e2d3e7f898f42803e90c9219062"
-  },
-  {
     "mexc": "CHZ/USDT:USDT",
     "mexc_contract": "CHZ_USDT",
     "chain": "ethereum",
@@ -574,25 +539,11 @@
     "address": "0x3506424f91fd33084466f402d5d97f05f8e3b4af"
   },
   {
-    "mexc": "CHZ/USDT:USDT",
-    "mexc_contract": "CHZ_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xf1938ce12400f9a761084e7a80d37e732a4da056"
-  },
-  {
     "mexc": "CRV/USDT:USDT",
     "mexc_contract": "CRV_USDT",
     "chain": "ethereum",
     "chainIndex": "1",
     "address": "0xd533a949740bb3306d119cc777fa900ba034cd52"
-  },
-  {
-    "mexc": "CRV/USDT:USDT",
-    "mexc_contract": "CRV_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x172370d5cd63279efa6d502dab29171933a610af"
   },
   {
     "mexc": "PHA/USDT:USDT",
@@ -628,13 +579,6 @@
     "chain": "ethereum",
     "chainIndex": "1",
     "address": "0x455e53cbb86018ac2b8092fdcd39d8444affc3f6"
-  },
-  {
-    "mexc": "POL/USDT:USDT",
-    "mexc_contract": "POL_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
   },
   {
     "mexc": "HNT/USDT:USDT",
@@ -686,13 +630,6 @@
     "address": "0xA0b73E1Ff0B80914AB6fe0444E65848C4C34450b"
   },
   {
-    "mexc": "CRO/USDT:USDT",
-    "mexc_contract": "CRO_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xada58df0f643d959c2a47c9d4d4c1a4defe3f11c"
-  },
-  {
     "mexc": "BAS/USDT:USDT",
     "mexc_contract": "BAS_USDT",
     "chain": "ethereum",
@@ -712,13 +649,6 @@
     "chain": "ethereum",
     "chainIndex": "1",
     "address": "0x45804880de22913dafe09f4980848ece6ecbaf78"
-  },
-  {
-    "mexc": "PAXG/USDT:USDT",
-    "mexc_contract": "PAXG_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x553d3d295e0f695b9228246232edf400ed3560b5"
   },
   {
     "mexc": "GODS/USDT:USDT",
@@ -770,13 +700,6 @@
     "address": "0x3845badAde8e6dFF049820680d1F14bD3903a5d0"
   },
   {
-    "mexc": "SAND/USDT:USDT",
-    "mexc_contract": "SAND_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"
-  },
-  {
     "mexc": "1INCH/USDT:USDT",
     "mexc_contract": "1INCH_USDT",
     "chain": "ethereum",
@@ -791,13 +714,6 @@
     "address": "0x111111111117dc0aa78b770fa6a738034120c302"
   },
   {
-    "mexc": "1INCH/USDT:USDT",
-    "mexc_contract": "1INCH_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x9c2c5fd7b07e95ee044ddeba0e97a665f142394f"
-  },
-  {
     "mexc": "BAT/USDT:USDT",
     "mexc_contract": "BAT_USDT",
     "chain": "ethereum",
@@ -810,13 +726,6 @@
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0x101d82428437127bf1608f699cd651e6abf9766e"
-  },
-  {
-    "mexc": "BAT/USDT:USDT",
-    "mexc_contract": "BAT_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x3cef98bb43d732e2f285ee605a8158cde967d219"
   },
   {
     "mexc": "AXS/USDT:USDT",
@@ -875,13 +784,6 @@
     "address": "0x9ac983826058b8a9c7aa1c9171441191232e8404"
   },
   {
-    "mexc": "SNX/USDT:USDT",
-    "mexc_contract": "SNX_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x50b728d8d964fd00c2d0aad81718b71311fef68a"
-  },
-  {
     "mexc": "OM/USDT:USDT",
     "mexc_contract": "OM_USDT",
     "chain": "ethereum",
@@ -894,13 +796,6 @@
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0xf78d2e7936f5fe18308a3b2951a93b6c4a41f5e2"
-  },
-  {
-    "mexc": "OM/USDT:USDT",
-    "mexc_contract": "OM_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xC3Ec80343D2bae2F8E680FDADDe7C17E71E114ea"
   },
   {
     "mexc": "BOBA/USDT:USDT",
@@ -933,13 +828,6 @@
   {
     "mexc": "GRT/USDT:USDT",
     "mexc_contract": "GRT_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x5fe2b58c013d7601147dcdd68c143a77499f5531"
-  },
-  {
-    "mexc": "GRT/USDT:USDT",
-    "mexc_contract": "GRT_USDT",
     "chain": "solana",
     "chainIndex": "501",
     "address": "HGsLG4PnZ28L8A4R5nPqKgZd86zUUdmfnkTRnuFJ5dAX"
@@ -964,13 +852,6 @@
     "chain": "ethereum",
     "chainIndex": "1",
     "address": "0xf57e7e7c23978c3caec3c3548e3d615c346e79ff"
-  },
-  {
-    "mexc": "IMX/USDT:USDT",
-    "mexc_contract": "IMX_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x60bb3d364b765c497c8ce50ae0ae3f0882c5bd05"
   },
   {
     "mexc": "ACH/USDT:USDT",
@@ -1085,13 +966,6 @@
     "address": "0x0f5d2fb29fb7d3cfee444a200298f468908cc942"
   },
   {
-    "mexc": "MANA/USDT:USDT",
-    "mexc_contract": "MANA_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xa1c57f48f0deb89f569dfbe6e2b7f46d33606fd4"
-  },
-  {
     "mexc": "REQ/USDT:USDT",
     "mexc_contract": "REQ_USDT",
     "chain": "ethereum",
@@ -1157,13 +1031,6 @@
   {
     "mexc": "SUSHI/USDT:USDT",
     "mexc_contract": "SUSHI_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a"
-  },
-  {
-    "mexc": "SUSHI/USDT:USDT",
-    "mexc_contract": "SUSHI_USDT",
     "chain": "solana",
     "chainIndex": "501",
     "address": "ChVzxWRmrTeSgwd3Ui3UumcN8KX7VK3WaD4KGeSKpypj"
@@ -1197,13 +1064,6 @@
     "address": "0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c"
   },
   {
-    "mexc": "ENJ/USDT:USDT",
-    "mexc_contract": "ENJ_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x7ec26842f195c852fa843bb9f6d8b583a274a157"
-  },
-  {
     "mexc": "EGLD/USDT:USDT",
     "mexc_contract": "EGLD_USDT",
     "chain": "bsc",
@@ -1223,13 +1083,6 @@
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0xc335Df7C25b72eEC661d5Aa32a7c2B7b2a1D1874"
-  },
-  {
-    "mexc": "ICE/USDT:USDT",
-    "mexc_contract": "ICE_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xc6c855ad634dcdad23e64da71ba85b8c51e5ad7c"
   },
   {
     "mexc": "SD/USDT:USDT",
@@ -1323,13 +1176,6 @@
     "address": "0x52ce071bd9b1c4b00a0b92d298c512478cad67e8"
   },
   {
-    "mexc": "COMP/USDT:USDT",
-    "mexc_contract": "COMP_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x8505b9d2254a7ae468c0e9dd10ccea3a837aef5c"
-  },
-  {
     "mexc": "CELR/USDT:USDT",
     "mexc_contract": "CELR_USDT",
     "chain": "ethereum",
@@ -1365,13 +1211,6 @@
     "address": "0x6810e776880c02933d47db1b9fc05908e5386b96"
   },
   {
-    "mexc": "GNO/USDT:USDT",
-    "mexc_contract": "GNO_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x5ffd62d3c3ee2e81c00a7b9079fb248e7df024a8"
-  },
-  {
     "mexc": "TOKEN/USDT:USDT",
     "mexc_contract": "TOKEN_USDT",
     "chain": "ethereum",
@@ -1400,25 +1239,11 @@
     "address": "0x3883f5e181fccaf8410fa61e12b59bad963fb645"
   },
   {
-    "mexc": "THETA/USDT:USDT",
-    "mexc_contract": "THETA_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xb46e0ae620efd98516f49bb00263317096c114b2"
-  },
-  {
     "mexc": "AMP/USDT:USDT",
     "mexc_contract": "AMP_USDT",
     "chain": "ethereum",
     "chainIndex": "1",
     "address": "0xff20817765cb7f73d4bde2e66e067e58d11095c2"
-  },
-  {
-    "mexc": "AMP/USDT:USDT",
-    "mexc_contract": "AMP_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x0621d647cecbfb64b79e44302c1933cb4f27054d"
   },
   {
     "mexc": "TWT/USDT:USDT",
@@ -1461,13 +1286,6 @@
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0x4691937a7508860f876c9c0a2a617e7d9e945d4b"
-  },
-  {
-    "mexc": "WOO/USDT:USDT",
-    "mexc_contract": "WOO_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x1B815d120B3eF02039Ee11dC2d33DE7aA4a8C603"
   },
   {
     "mexc": "AEVO/USDT:USDT",
@@ -1561,13 +1379,6 @@
     "address": "0x9678e42cebeb63f23197d726b29b1cb20d0064e5"
   },
   {
-    "mexc": "IOTX/USDT:USDT",
-    "mexc_contract": "IOTX_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xf6372cdb9c1d3674e83842e3800f2a62ac9f3c66"
-  },
-  {
     "mexc": "USTC/USDT:USDT",
     "mexc_contract": "USTC_USDT",
     "chain": "ethereum",
@@ -1580,13 +1391,6 @@
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0x23396cf899ca06c4472205fc903bdb4de249d6fc"
-  },
-  {
-    "mexc": "USTC/USDT:USDT",
-    "mexc_contract": "USTC_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x692597b009d13c4049a947cab2239b7d6517875f"
   },
   {
     "mexc": "YFI/USDT:USDT",
@@ -1603,25 +1407,11 @@
     "address": "0x88f1a5ae2a3bf98aeaf342d26b30a79438c9142e"
   },
   {
-    "mexc": "YFI/USDT:USDT",
-    "mexc_contract": "YFI_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xda537104d6a5edd53c6fbba9a898708e465260b6"
-  },
-  {
     "mexc": "LPT/USDT:USDT",
     "mexc_contract": "LPT_USDT",
     "chain": "ethereum",
     "chainIndex": "1",
     "address": "0x58b6A8A3302369DAEc383334672404Ee733aB239"
-  },
-  {
-    "mexc": "LPT/USDT:USDT",
-    "mexc_contract": "LPT_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x3962f4a0a0051dcce0be73a7e09cef5756736712"
   },
   {
     "mexc": "BICO/USDT:USDT",
@@ -1654,13 +1444,6 @@
   {
     "mexc": "GMT/USDT:USDT",
     "mexc_contract": "GMT_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x714db550b574b3e927af3d93e26127d15721d4c2"
-  },
-  {
-    "mexc": "GMT/USDT:USDT",
-    "mexc_contract": "GMT_USDT",
     "chain": "solana",
     "chainIndex": "501",
     "address": "7i5KKsX2weiTkry7jA4ZwSuXGhs5eJBEjY8vVxR4pfRx"
@@ -1685,13 +1468,6 @@
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"
-  },
-  {
-    "mexc": "USDC/USDT:USDT",
-    "mexc_contract": "USDC_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359"
   },
   {
     "mexc": "USDC/USDT:USDT",
@@ -1755,13 +1531,6 @@
     "chain": "ethereum",
     "chainIndex": "1",
     "address": "0xbbbbca6a901c926f240b89eacb641d8aec7aeafd"
-  },
-  {
-    "mexc": "LRC/USDT:USDT",
-    "mexc_contract": "LRC_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x84e1670f61347cdaed56dcc736fb990fbb47ddc1"
   },
   {
     "mexc": "C98/USDT:USDT",
@@ -1855,13 +1624,6 @@
     "address": "0x6c6ee5e31d828de241282b9606c8e98ea48526e2"
   },
   {
-    "mexc": "HOT/USDT:USDT",
-    "mexc_contract": "HOT_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x0c51f415cf478f8d08c246a6c6ee180c5dc3a012"
-  },
-  {
     "mexc": "AI/USDT:USDT",
     "mexc_contract": "AI_USDT",
     "chain": "ethereum",
@@ -1888,13 +1650,6 @@
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0xf307910a4c7bbc79691fd374889b36d8531b08e3"
-  },
-  {
-    "mexc": "ANKR/USDT:USDT",
-    "mexc_contract": "ANKR_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x101a023270368c0d50bffb62780f4afd4ea79c35"
   },
   {
     "mexc": "ALT/USDT:USDT",
@@ -2030,13 +1785,6 @@
     "address": "0xa069008a669e2af00a86673d9d584cfb524a42cc"
   },
   {
-    "mexc": "BNT/USDT:USDT",
-    "mexc_contract": "BNT_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xc26d47d5c33ac71ac5cf9f776d63ba292a4f7842"
-  },
-  {
     "mexc": "ZKJ/USDT:USDT",
     "mexc_contract": "ZKJ_USDT",
     "chain": "ethereum",
@@ -2072,25 +1820,11 @@
     "address": "0xfe56d5892bdffc7bf58f2e84be1b2c32d21c308b"
   },
   {
-    "mexc": "KNC/USDT:USDT",
-    "mexc_contract": "KNC_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x1c954e8fe737f99f68fa1ccda3e51ebdb291948c"
-  },
-  {
     "mexc": "ZRX/USDT:USDT",
     "mexc_contract": "ZRX_USDT",
     "chain": "ethereum",
     "chainIndex": "1",
     "address": "0xe41d2489571d322189246dafa5ebde1f4699f498"
-  },
-  {
-    "mexc": "ZRX/USDT:USDT",
-    "mexc_contract": "ZRX_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x5559edb74751a0ede9dea4dc23aee72cca6be3d5"
   },
   {
     "mexc": "SXP/USDT:USDT",
@@ -2296,13 +2030,6 @@
     "address": "0x4a9a2b2b04549c3927dd2c9668a5ef3fca473623"
   },
   {
-    "mexc": "DF/USDT:USDT",
-    "mexc_contract": "DF_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x08c15fa26e519a78a666d19ce5c646d55047e0a3"
-  },
-  {
     "mexc": "SUPER/USDT:USDT",
     "mexc_contract": "SUPER_USDT",
     "chain": "ethereum",
@@ -2352,13 +2079,6 @@
     "address": "0x8da443f84fea710266c8eb6bc34b71702d033ef2"
   },
   {
-    "mexc": "CTSI/USDT:USDT",
-    "mexc_contract": "CTSI_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x2727ab1c2d22170abc9b595177b2d5c6e1ab7b7b"
-  },
-  {
     "mexc": "SYN/USDT:USDT",
     "mexc_contract": "SYN_USDT",
     "chain": "ethereum",
@@ -2371,13 +2091,6 @@
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0xa4080f1778e69467e905b8d6f72f6e441f9e9484"
-  },
-  {
-    "mexc": "SYN/USDT:USDT",
-    "mexc_contract": "SYN_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0xf8f9efc0db77d8881500bb06ff5d6abc3070e695"
   },
   {
     "mexc": "PRCL/USDT:USDT",
@@ -2448,13 +2161,6 @@
     "chain": "ethereum",
     "chainIndex": "1",
     "address": "0xd33526068d116ce69f19a9ee46f0bd304f21a51f"
-  },
-  {
-    "mexc": "RPL/USDT:USDT",
-    "mexc_contract": "RPL_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x7205705771547cf79201111b4bd8aaf29467b9ec"
   },
   {
     "mexc": "XVS/USDT:USDT",
@@ -2576,13 +2282,6 @@
     "address": "0xB0D502E938ed5f4df2E681fE6E419ff29631d62b"
   },
   {
-    "mexc": "STG/USDT:USDT",
-    "mexc_contract": "STG_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590"
-  },
-  {
     "mexc": "OXT/USDT:USDT",
     "mexc_contract": "OXT_USDT",
     "chain": "ethereum",
@@ -2651,13 +2350,6 @@
     "chain": "bsc",
     "chainIndex": "56",
     "address": "0x0856978f7ffff0a2471b4520e3521c4b3343e36f"
-  },
-  {
-    "mexc": "IDEX/USDT:USDT",
-    "mexc_contract": "IDEX_USDT",
-    "chain": "polygon",
-    "chainIndex": "137",
-    "address": "0x9cb74c8032b007466865f060ad2c46145d45553d"
   },
   {
     "mexc": "FORTH/USDT:USDT",
