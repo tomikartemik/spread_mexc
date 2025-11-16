@@ -15,12 +15,13 @@ import (
 
 // Symbol describes a tradable instrument mapping between MEXC and DexScreener.
 type Symbol struct {
-	MexcSymbol string `json:"mexc"`
-	DexPair    string `json:"dex"`
-	DexChain   string `json:"chain"`
-	DexAddress string `json:"address"`
-	DexName    string `json:"name"`
-	ChainIndex string `json:"chainIndex"`
+	MexcSymbol   string `json:"mexc"`
+	MexcContract string `json:"mexc_contract"`
+	DexPair      string `json:"dex"`
+	DexChain     string `json:"chain"`
+	DexAddress   string `json:"address"`
+	DexName      string `json:"name"`
+	ChainIndex   string `json:"chainIndex"`
 }
 
 // Settings holds runtime configuration derived from environment variables.
@@ -140,15 +141,26 @@ func Load() (Settings, error) {
 
 func loadSymbols() ([]ResolvedSymbol, error) {
 	raw := strings.TrimSpace(os.Getenv("SYMBOLS_CONFIG"))
-	if raw == "" {
-		return nil, errors.New("SYMBOLS_CONFIG is required and must be JSON")
-	}
 	var entries []Symbol
-	if err := json.Unmarshal([]byte(raw), &entries); err != nil {
-		return nil, fmt.Errorf("failed to parse SYMBOLS_CONFIG: %w", err)
+	if raw != "" {
+		if err := json.Unmarshal([]byte(raw), &entries); err != nil {
+			return nil, fmt.Errorf("failed to parse SYMBOLS_CONFIG: %w", err)
+		}
+	} else {
+		path := strings.TrimSpace(os.Getenv("SYMBOLS_FILE"))
+		if path == "" {
+			path = "spread_pairs.json"
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return nil, fmt.Errorf("read symbols file %s: %w", path, err)
+		}
+		if err := json.Unmarshal(data, &entries); err != nil {
+			return nil, fmt.Errorf("parse symbols file %s: %w", path, err)
+		}
 	}
 	if len(entries) == 0 {
-		return nil, errors.New("SYMBOLS_CONFIG must contain at least one entry")
+		return nil, errors.New("symbols list is empty")
 	}
 	resolved := make([]ResolvedSymbol, 0, len(entries))
 	for _, entry := range entries {
@@ -177,9 +189,13 @@ func loadSymbols() ([]ResolvedSymbol, error) {
 		if address == "" {
 			return nil, fmt.Errorf("symbol %s is missing Dex address", mexc)
 		}
+		restSymbol := strings.TrimSpace(entry.MexcContract)
+		if restSymbol == "" {
+			restSymbol = symbolToRest(mexc)
+		}
 		resolved = append(resolved, ResolvedSymbol{
 			MexcSymbol: mexc,
-			RestSymbol: symbolToRest(mexc),
+			RestSymbol: restSymbol,
 			DexPair:    dexPair,
 			DexChain:   strings.TrimSpace(entry.DexChain),
 			DexAddress: address,
