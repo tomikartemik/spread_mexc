@@ -148,16 +148,42 @@ func (b *Bot) mexcPriceLoop(ctx context.Context) error {
 }
 
 func (b *Bot) refreshMexcPrices(ctx context.Context) error {
-	for _, state := range b.states {
-		reqCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
-		price, err := b.client.TickerPrice(reqCtx, state.RestSymbol)
-		cancel()
-		if err != nil {
-			log.Printf("failed to fetch price for %s: %v", state.RestSymbol, err)
-			continue
-		}
-		state.UpdateMexcPrice(price)
+	workerCount := b.cfg.MexcPriceWorkers
+	if workerCount > len(b.states) {
+		workerCount = len(b.states)
 	}
+	if workerCount < 1 {
+		workerCount = 1
+	}
+	jobs := make(chan *SymbolState)
+	var wg sync.WaitGroup
+	for i := 0; i < workerCount; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for state := range jobs {
+				reqCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
+				price, err := b.client.TickerPrice(reqCtx, state.RestSymbol)
+				cancel()
+				if err != nil {
+					log.Printf("failed to fetch price for %s: %v", state.RestSymbol, err)
+					continue
+				}
+				state.UpdateMexcPrice(price)
+			}
+		}()
+	}
+
+sendLoop:
+	for _, state := range b.states {
+		select {
+		case <-ctx.Done():
+			break sendLoop
+		case jobs <- state:
+		}
+	}
+	close(jobs)
+	wg.Wait()
 	return nil
 }
 

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -45,11 +46,32 @@ func New(baseURL, accessKey, secretKey, passphrase string, timeout time.Duration
 	}
 }
 
+const maxBatchSize = 50
+
 // FetchPrices возвращает цены (в USDT) для указанных токенов.
 func (c *Client) FetchPrices(ctx context.Context, tokens []Token) (map[string]float64, error) {
 	if len(tokens) == 0 {
 		return map[string]float64{}, nil
 	}
+	result := make(map[string]float64, len(tokens))
+	for start := 0; start < len(tokens); start += maxBatchSize {
+		end := start + maxBatchSize
+		if end > len(tokens) {
+			end = len(tokens)
+		}
+		chunk := tokens[start:end]
+		batchPrices, err := c.fetchBatch(ctx, chunk)
+		if err != nil {
+			return nil, err
+		}
+		for k, v := range batchPrices {
+			result[k] = v
+		}
+	}
+	return result, nil
+}
+
+func (c *Client) fetchBatch(ctx context.Context, tokens []Token) (map[string]float64, error) {
 	reqItems := make([]map[string]string, 0, len(tokens))
 	for _, t := range tokens {
 		if t.ChainIndex == "" || t.Address == "" {
@@ -59,6 +81,9 @@ func (c *Client) FetchPrices(ctx context.Context, tokens []Token) (map[string]fl
 			"chainIndex":           t.ChainIndex,
 			"tokenContractAddress": t.Address,
 		})
+	}
+	if len(reqItems) == 0 {
+		return map[string]float64{}, nil
 	}
 	body, err := json.Marshal(reqItems)
 	if err != nil {
@@ -89,13 +114,9 @@ func (c *Client) FetchPrices(ctx context.Context, tokens []Token) (map[string]fl
 	}
 
 	var decoded struct {
-		Code string `json:"code"`
-		Msg  string `json:"msg"`
-		Data []struct {
-			ChainIndex string `json:"chainIndex"`
-			Address    string `json:"tokenContractAddress"`
-			Price      string `json:"price"`
-		} `json:"data"`
+		Code string          `json:"code"`
+		Msg  string          `json:"msg"`
+		Data json.RawMessage `json:"data"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&decoded); err != nil {
 		return nil, err
@@ -103,9 +124,12 @@ func (c *Client) FetchPrices(ctx context.Context, tokens []Token) (map[string]fl
 	if decoded.Code != "0" {
 		return nil, fmt.Errorf("okx error %s: %s", decoded.Code, decoded.Msg)
 	}
-
-	result := make(map[string]float64, len(decoded.Data))
-	for _, item := range decoded.Data {
+	items, err := parsePriceItems(decoded.Data)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[string]float64, len(items))
+	for _, item := range items {
 		if item.Price == "" {
 			continue
 		}
@@ -116,6 +140,42 @@ func (c *Client) FetchPrices(ctx context.Context, tokens []Token) (map[string]fl
 		result[key(item.ChainIndex, item.Address)] = price
 	}
 	return result, nil
+}
+
+type priceItem struct {
+	ChainIndex string `json:"chainIndex"`
+	Address    string `json:"tokenContractAddress"`
+	Price      string `json:"price"`
+}
+
+func parsePriceItems(raw json.RawMessage) ([]priceItem, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	trimmed := strings.TrimSpace(string(raw))
+	if trimmed == "" || trimmed == "null" || trimmed == "{}" {
+		return nil, nil
+	}
+	var arr []priceItem
+	if err := json.Unmarshal(raw, &arr); err == nil {
+		return arr, nil
+	}
+	var wrapper struct {
+		Result []priceItem `json:"result"`
+		Data   []priceItem `json:"data"`
+		Rows   []priceItem `json:"rows"`
+	}
+	if err := json.Unmarshal(raw, &wrapper); err == nil {
+		switch {
+		case len(wrapper.Result) > 0:
+			return wrapper.Result, nil
+		case len(wrapper.Data) > 0:
+			return wrapper.Data, nil
+		case len(wrapper.Rows) > 0:
+			return wrapper.Rows, nil
+		}
+	}
+	return nil, fmt.Errorf("unsupported OKX price format: %s", trimmed)
 }
 
 func (c *Client) sign(timestamp, method, path, body string) string {

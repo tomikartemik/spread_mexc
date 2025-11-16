@@ -40,6 +40,7 @@ type Settings struct {
 	MinEntrySpread   float64
 	DecisionInterval time.Duration
 	MexcPollInterval time.Duration
+	MexcPriceWorkers int
 	DebugPrices      bool
 	Symbols          []ResolvedSymbol
 	Telegram         *TelegramSettings
@@ -102,6 +103,10 @@ func Load() (Settings, error) {
 	cfg.ConfirmDuration = durationFromEnv("ARBITRAGE_CONFIRM_DURATION", 500*time.Millisecond)
 	cfg.DecisionInterval = durationFromEnv("ARBITRAGE_DECISION_INTERVAL", time.Second)
 	cfg.MexcPollInterval = durationFromEnv("MEXC_PRICE_POLL_INTERVAL", 5*time.Second)
+	cfg.MexcPriceWorkers = intFromEnv("MEXC_PRICE_WORKERS", 8)
+	if cfg.MexcPriceWorkers < 1 {
+		cfg.MexcPriceWorkers = 1
+	}
 	cfg.DebugPrices = boolFromEnv("ARBITRAGE_DEBUG_PRICES", false)
 
 	symbols, err := loadSymbols()
@@ -142,6 +147,7 @@ func Load() (Settings, error) {
 func loadSymbols() ([]ResolvedSymbol, error) {
 	raw := strings.TrimSpace(os.Getenv("SYMBOLS_CONFIG"))
 	var entries []Symbol
+	sourceFile := ""
 	if raw != "" {
 		if err := json.Unmarshal([]byte(raw), &entries); err != nil {
 			return nil, fmt.Errorf("failed to parse SYMBOLS_CONFIG: %w", err)
@@ -151,6 +157,7 @@ func loadSymbols() ([]ResolvedSymbol, error) {
 		if path == "" {
 			path = "spread_pairs.json"
 		}
+		sourceFile = path
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return nil, fmt.Errorf("read symbols file %s: %w", path, err)
@@ -161,6 +168,15 @@ func loadSymbols() ([]ResolvedSymbol, error) {
 	}
 	if len(entries) == 0 {
 		return nil, errors.New("symbols list is empty")
+	}
+	if len(entries) > 400 && raw == "" {
+		if sourceFile == "" {
+			sourceFile = strings.TrimSpace(os.Getenv("SYMBOLS_FILE"))
+			if sourceFile == "" {
+				sourceFile = "spread_pairs.json"
+			}
+		}
+		fmt.Printf("Loaded %d symbols from %s; consider reducing to avoid rate limits.\n", len(entries), sourceFile)
 	}
 	resolved := make([]ResolvedSymbol, 0, len(entries))
 	for _, entry := range entries {
