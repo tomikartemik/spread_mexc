@@ -70,13 +70,6 @@
     "address": "0xd85c31854c2b0fb40aaa9e2fc4da23c21f829d46"
   },
   {
-    "mexc": "BELIEVE/USDT:USDT",
-    "mexc_contract": "BELIEVE_USDT",
-    "chain": "solana",
-    "chainIndex": "501",
-    "address": "BLVxek8YMXUQhcKmMvrFTrzh5FXg8ec88Crp6otEaCMf"
-  },
-  {
     "mexc": "LITKEY/USDT:USDT",
     "mexc_contract": "LITKEY_USDT",
     "chain": "base",

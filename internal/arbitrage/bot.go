@@ -356,12 +356,8 @@ func (b *Bot) openPosition(ctx context.Context, state *SymbolState, dir Directio
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	resp, err := b.client.SubmitMarketOrder(ctx, order)
-	if err != nil {
+	if _, err := b.submitOrderWithScaling(ctx, state, order); err != nil {
 		return err
-	}
-	if resp != nil && !resp.Success {
-		return fmt.Errorf("mexc rejected order: %s", resp.Msg)
 	}
 
 	state.SetPosition(&Position{
@@ -406,12 +402,8 @@ func (b *Bot) closePosition(ctx context.Context, state *SymbolState, reason stri
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	resp, err := b.client.SubmitMarketOrder(ctx, order)
-	if err != nil {
+	if _, err := b.submitOrderWithScaling(ctx, state, order); err != nil {
 		return err
-	}
-	if resp != nil && !resp.Success {
-		return fmt.Errorf("mexc rejected order: %s", resp.Msg)
 	}
 
 	state.ClearPosition()
@@ -450,7 +442,8 @@ func (b *Bot) computeAmount(state *SymbolState, price float64) (float64, error) 
 	if contract.ContractSize <= 0 {
 		return 0, fmt.Errorf("contract size missing")
 	}
-	raw := b.cfg.QuoteSize / (price * contract.ContractSize)
+	quote := b.cfg.QuoteSize
+	raw := quote / (price * contract.ContractSize)
 	step := contract.VolumeStep
 	if step <= 0 {
 		step = 1
@@ -580,4 +573,56 @@ func (b *Bot) balanceLine() string {
 		return ""
 	}
 	return fmt.Sprintf("Баланс: %.2f USDT\n", b.tracker.CurrentBalance())
+}
+
+func (b *Bot) submitOrderWithScaling(ctx context.Context, state *SymbolState, order mexc.MarketOrder) (*mexc.SubmitOrderResponse, error) {
+	amount := order.Volume
+	step := state.Contract.VolumeStep
+	if step <= 0 {
+		step = 1
+	}
+	minVol := state.Contract.MinVolume
+	const maxAttempts = 5
+
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		resp, err := b.client.SubmitMarketOrder(ctx, order)
+		if err == nil && (resp == nil || resp.Success) {
+			return resp, nil
+		}
+		if !b.shouldScaleOrder(err) || attempt == maxAttempts {
+			if err != nil {
+				return resp, err
+			}
+			return resp, fmt.Errorf("mexc rejected order")
+		}
+
+		amount = math.Floor((amount*0.8)/step) * step
+		if amount < minVol {
+			return resp, fmt.Errorf("volume %.6f below minimum %.6f after scaling", amount, minVol)
+		}
+		order.Volume = amount
+		log.Printf("%s: scaling order to %.6f due to limit (attempt %d)", state.MexcSymbol, amount, attempt)
+		time.Sleep(150 * time.Millisecond)
+	}
+	return nil, fmt.Errorf("failed to submit order after scaling attempts")
+}
+
+func (b *Bot) shouldScaleOrder(err error) bool {
+	var statusErr *mexc.StatusError
+	if errors.As(err, &statusErr) {
+		if statusErr.Code == http.StatusTooManyRequests || statusErr.Code == http.StatusForbidden || statusErr.Code == http.StatusBadRequest {
+			return true
+		}
+	}
+	var orderErr *mexc.OrderError
+	if errors.As(err, &orderErr) {
+		msg := strings.ToLower(orderErr.Msg)
+		keywords := []string{"limit", "max", "insufficient", "risk", "margin", "size"}
+		for _, k := range keywords {
+			if strings.Contains(msg, k) {
+				return true
+			}
+		}
+	}
+	return false
 }

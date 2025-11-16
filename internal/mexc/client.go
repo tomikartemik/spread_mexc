@@ -113,7 +113,7 @@ func (c *Client) SubmitMarketOrder(ctx context.Context, order MarketOrder) (*Sub
 		return nil, err
 	}
 	if !resp.Success {
-		return &resp, fmt.Errorf("mexc submit order failed: %s", resp.Msg)
+		return &resp, &OrderError{Msg: resp.Msg}
 	}
 	return &resp, nil
 }
@@ -216,6 +216,15 @@ func buildHeaders(includeAuth bool, body []byte, token string) map[string]string
 		}
 	}
 	return headers
+}
+
+// OrderError описывает ошибку MEXC при работе с ордерами.
+type OrderError struct {
+	Msg string
+}
+
+func (e *OrderError) Error() string {
+	return e.Msg
 }
 
 func signPayload(token, timestamp string, body []byte) string {
