@@ -356,7 +356,7 @@ func (b *Bot) openPosition(ctx context.Context, state *SymbolState, dir Directio
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	if _, err := b.submitOrderWithScaling(ctx, state, order); err != nil {
+	if _, err := b.submitOrderWithScaling(ctx, state, order, b.client.SubmitLimitOrder); err != nil {
 		return err
 	}
 
@@ -402,7 +402,7 @@ func (b *Bot) closePosition(ctx context.Context, state *SymbolState, reason stri
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	if _, err := b.submitOrderWithScaling(ctx, state, order); err != nil {
+	if _, err := b.submitOrderWithScaling(ctx, state, order, b.client.SubmitLimitOrder); err != nil {
 		return err
 	}
 
@@ -575,7 +575,7 @@ func (b *Bot) balanceLine() string {
 	return fmt.Sprintf("Баланс: %.2f USDT\n", b.tracker.CurrentBalance())
 }
 
-func (b *Bot) submitOrderWithScaling(ctx context.Context, state *SymbolState, order mexc.MarketOrder) (*mexc.SubmitOrderResponse, error) {
+func (b *Bot) submitOrderWithScaling(ctx context.Context, state *SymbolState, order mexc.MarketOrder, submit func(context.Context, mexc.MarketOrder) (*mexc.SubmitOrderResponse, error)) (*mexc.SubmitOrderResponse, error) {
 	amount := order.Volume
 	step := state.Contract.VolumeStep
 	if step <= 0 {
@@ -585,7 +585,7 @@ func (b *Bot) submitOrderWithScaling(ctx context.Context, state *SymbolState, or
 	const maxAttempts = 5
 
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
-		resp, err := b.client.SubmitMarketOrder(ctx, order)
+		resp, err := submit(ctx, order)
 		if err == nil && (resp == nil || resp.Success) {
 			return resp, nil
 		}

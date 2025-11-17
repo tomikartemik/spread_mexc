@@ -71,8 +71,17 @@ type SubmitOrderResponse struct {
 	Data    json.RawMessage `json:"data"`
 }
 
-// SubmitMarketOrder submits a fully-populated market order payload.
+// SubmitMarketOrder submits a market order (type=5).
 func (c *Client) SubmitMarketOrder(ctx context.Context, order MarketOrder) (*SubmitOrderResponse, error) {
+	return c.submitOrder(ctx, order, 5)
+}
+
+// SubmitLimitOrder submits a limit order (type=1).
+func (c *Client) SubmitLimitOrder(ctx context.Context, order MarketOrder) (*SubmitOrderResponse, error) {
+	return c.submitOrder(ctx, order, 1)
+}
+
+func (c *Client) submitOrder(ctx context.Context, order MarketOrder, orderType int) (*SubmitOrderResponse, error) {
 	if order.Symbol == "" {
 		return nil, fmt.Errorf("symbol is required")
 	}
@@ -92,7 +101,7 @@ func (c *Client) SubmitMarketOrder(ctx context.Context, order MarketOrder) (*Sub
 		Price:        order.Price,
 		Volume:       order.Volume,
 		Side:         order.Side,
-		Type:         5,
+		Type:         orderType,
 		OpenType:     order.OpenType,
 		ReduceOnly:   order.ReduceOnly,
 		Leverage:     order.Leverage,
