@@ -28,11 +28,11 @@
     "address": "GMzuntWYJLpNuCizrSR7ZXggiMdDzTNiEmSNHHunpump"
   },
   {
-    "mexc": "LMTS/USDT:USDT",
-    "mexc_contract": "LMTS_USDT",
-    "chain": "base",
-    "chainIndex": "8453",
-    "address": "0x9eadbe35f3ee3bf3e28180070c429298a1b02f93"
+    "mexc": "BAGWORK/USDT:USDT",
+    "mexc_contract": "BAGWORK_USDT",
+    "chain": "solana",
+    "chainIndex": "501",
+    "address": "7Pnqg1S6MYrL6AP1ZXcToTHfdBbTB77ze6Y33qBBpump"
   },
   {
     "mexc": "TITN/USDT:USDT",
@@ -63,10 +63,10 @@
     "address": "0xc61eb549acf4a05ed6e3fe0966f5e213b23541ce"
   },
   {
-    "mexc": "PING/USDT:USDT",
-    "mexc_contract": "PING_USDT",
-    "chain": "base",
-    "chainIndex": "8453",
-    "address": "0xd85c31854c2b0fb40aaa9e2fc4da23c21f829d46"
+    "mexc": "67/USDT:USDT",
+    "mexc_contract": "67_USDT",
+    "chain": "solana",
+    "chainIndex": "501",
+    "address": "9AvytnUKsLxPxFHFqS6VLxaxt5p6BhYNr53SD2Chpump"
   }
 ]
