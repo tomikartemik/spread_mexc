@@ -39,6 +39,7 @@ type Settings struct {
 	ConfirmDuration     time.Duration
 	MinEntrySpread      float64
 	InitialBalance      float64
+	EntryOffsetPercent  float64
 	DecisionInterval    time.Duration
 	MexcPollInterval    time.Duration
 	MexcPriceDelay      time.Duration
@@ -49,6 +50,7 @@ type Settings struct {
 	Symbols             []ResolvedSymbol
 	Telegram            *TelegramSettings
 	OKX                 OKXSettings
+	BalanceCurrency     string
 }
 
 // TelegramSettings описывает параметры уведомлений в Telegram.
@@ -107,6 +109,7 @@ func Load() (Settings, error) {
 	cfg.ConfirmDrop = floatFromEnv("ARBITRAGE_CONFIRM_DROP", 0.3)
 	cfg.MinEntrySpread = floatFromEnv("ARBITRAGE_MIN_ENTRY_SPREAD", 8)
 	cfg.InitialBalance = floatFromEnv("ARBITRAGE_INITIAL_BALANCE", 0)
+	cfg.EntryOffsetPercent = floatFromEnv("ARBITRAGE_LIMIT_OFFSET", 0.5)
 	cfg.ConfirmDuration = durationFromEnv("ARBITRAGE_CONFIRM_DURATION", 500*time.Millisecond)
 	cfg.DecisionInterval = durationFromEnv("ARBITRAGE_DECISION_INTERVAL", time.Second)
 	cfg.MexcPollInterval = durationFromEnv("MEXC_PRICE_POLL_INTERVAL", 5*time.Second)
@@ -130,6 +133,12 @@ func Load() (Settings, error) {
 		return cfg, err
 	}
 	cfg.Symbols = symbols
+
+	balanceCurrency := strings.TrimSpace(os.Getenv("MEXC_BALANCE_CURRENCY"))
+	if balanceCurrency == "" {
+		balanceCurrency = "USDT"
+	}
+	cfg.BalanceCurrency = strings.ToUpper(balanceCurrency)
 
 	botToken := strings.TrimSpace(os.Getenv("TELEGRAM_BOT_TOKEN"))
 	chatID := strings.TrimSpace(os.Getenv("TELEGRAM_CHAT_ID"))

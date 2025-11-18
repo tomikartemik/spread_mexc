@@ -127,6 +127,72 @@ func (c *Client) submitOrder(ctx context.Context, order MarketOrder, orderType i
 	return &resp, nil
 }
 
+// GetAccountBalance returns the available balance for the given currency.
+func (c *Client) GetAccountBalance(ctx context.Context, currency string) (float64, error) {
+	if currency == "" {
+		currency = "USDT"
+	}
+	path := fmt.Sprintf("/private/account/asset/%s", strings.ToUpper(currency))
+	respBytes, err := c.request(ctx, http.MethodGet, path, nil, nil, true)
+	if err != nil {
+		return 0, err
+	}
+	var resp struct {
+		Success bool            `json:"success"`
+		Msg     string          `json:"msg"`
+		Data    json.RawMessage `json:"data"`
+	}
+	if err := json.Unmarshal(respBytes, &resp); err != nil {
+		return 0, err
+	}
+	if !resp.Success {
+		return 0, fmt.Errorf("account asset failed: %s", resp.Msg)
+	}
+	value := extractBalanceValue(resp.Data)
+	if value == 0 {
+		return 0, fmt.Errorf("account asset response missing balance")
+	}
+	return value, nil
+}
+
+func extractBalanceValue(data json.RawMessage) float64 {
+	if len(data) == 0 {
+		return 0
+	}
+	var obj map[string]interface{}
+	if err := json.Unmarshal(data, &obj); err == nil {
+		return balanceFromMap(obj)
+	}
+	var arr []map[string]interface{}
+	if err := json.Unmarshal(data, &arr); err == nil {
+		for _, item := range arr {
+			if v := balanceFromMap(item); v != 0 {
+				return v
+			}
+		}
+	}
+	return 0
+}
+
+func balanceFromMap(m map[string]interface{}) float64 {
+	keys := []string{
+		"availableMargin",
+		"availableBalance",
+		"available",
+		"marginBalance",
+		"equity",
+		"balance",
+	}
+	for _, k := range keys {
+		if v, ok := m[k]; ok {
+			if val := parseMaybeFloat(v); val != 0 {
+				return val
+			}
+		}
+	}
+	return 0
+}
+
 // TickerPrice fetches the latest futures price from the public endpoint.
 func (c *Client) TickerPrice(ctx context.Context, symbol string) (float64, error) {
 	if symbol == "" {

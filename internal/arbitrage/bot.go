@@ -338,6 +338,8 @@ func (b *Bot) openPosition(ctx context.Context, state *SymbolState, dir Directio
 		return fmt.Errorf("computed zero amount")
 	}
 
+	limitPrice := b.adjustEntryPrice(price, dir)
+
 	side := mexc.SideOpenShort
 	if dir == directionLong {
 		side = mexc.SideOpenLong
@@ -347,7 +349,7 @@ func (b *Bot) openPosition(ctx context.Context, state *SymbolState, dir Directio
 		Symbol:     state.RestSymbol,
 		Side:       side,
 		Volume:     amount,
-		Price:      price,
+		Price:      limitPrice,
 		OpenType:   2,
 		Leverage:   b.cfg.Leverage,
 		ReduceOnly: false,
@@ -363,12 +365,13 @@ func (b *Bot) openPosition(ctx context.Context, state *SymbolState, dir Directio
 	state.SetPosition(&Position{
 		Direction:   dir,
 		Amount:      amount,
-		EntryPrice:  price,
+		EntryPrice:  limitPrice,
 		EntrySpread: spread,
 		OpenedAt:    time.Now(),
 	})
-	log.Printf("%s opened %s at %.6f amount %.6f spread %.2f%%", state.MexcSymbol, dir, price, amount, spread)
-	b.notifyf(b.formatOpenMessage(state, dir, price, amount, spread))
+	balance := b.refreshBalance()
+	log.Printf("%s opened %s at %.6f amount %.6f spread %.2f%%", state.MexcSymbol, dir, limitPrice, amount, spread)
+	b.notifyf(b.formatOpenMessage(state, dir, limitPrice, spread, balance))
 	return nil
 }
 
@@ -382,6 +385,8 @@ func (b *Bot) closePosition(ctx context.Context, state *SymbolState, reason stri
 	}
 	pos := snap.Position
 
+	exitPrice := b.adjustExitPrice(snap.MexcPrice, pos.Direction)
+
 	var side int
 	if pos.Direction == directionLong {
 		side = mexc.SideCloseLong
@@ -393,7 +398,7 @@ func (b *Bot) closePosition(ctx context.Context, state *SymbolState, reason stri
 		Symbol:     state.RestSymbol,
 		Side:       side,
 		Volume:     pos.Amount,
-		Price:      snap.MexcPrice,
+		Price:      exitPrice,
 		OpenType:   2,
 		Leverage:   b.cfg.Leverage,
 		ReduceOnly: true,
@@ -409,10 +414,11 @@ func (b *Bot) closePosition(ctx context.Context, state *SymbolState, reason stri
 	state.ClearPosition()
 	pnl := 0.0
 	if b.tracker != nil {
-		pnl = b.tracker.RecordTrade(state.MexcSymbol, pos.Direction, pos.EntryPrice, snap.MexcPrice, pos.Amount, state.Contract.ContractSize, spread)
+		pnl = b.tracker.RecordTrade(state.MexcSymbol, pos.Direction, pos.EntryPrice, exitPrice, pos.Amount, state.Contract.ContractSize, spread)
 	}
+	balance := b.refreshBalance()
 	log.Printf("%s closed %s (%s) pnl %+.4f", state.MexcSymbol, pos.Direction, reason, pnl)
-	b.notifyf(b.formatCloseMessage(state, pos, snap.MexcPrice, spread, reason, pnl))
+	b.notifyf(b.formatCloseMessage(state, pos, exitPrice, spread, pnl, balance))
 	return nil
 }
 
@@ -509,6 +515,7 @@ func (b *Bot) dailyReportLoop(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-timer.C:
+			b.refreshBalance()
 			report := b.tracker.BuildReport(next)
 			ctxNotify, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			if err := b.notifier.Notify(ctxNotify, report); err != nil {
@@ -522,24 +529,17 @@ func (b *Bot) dailyReportLoop(ctx context.Context) error {
 	}
 }
 
-func (b *Bot) formatOpenMessage(state *SymbolState, dir Direction, price, amount, spread float64) string {
+func (b *Bot) formatOpenMessage(state *SymbolState, dir Direction, price, spread, balance float64) string {
 	var builder strings.Builder
-	emoji := "🔔"
-	builder.WriteString(fmt.Sprintf("%s Открыт %s\n", emoji, strings.ToUpper(string(dir))))
+	builder.WriteString(fmt.Sprintf("🔔 Открыт %s\n", strings.ToUpper(string(dir))))
 	builder.WriteString(fmt.Sprintf("• Инструмент: %s\n", state.RestSymbol))
-	builder.WriteString(fmt.Sprintf("• Размер: %.4f\n", amount))
 	builder.WriteString(fmt.Sprintf("• Вход: %.6f\n", price))
 	builder.WriteString(fmt.Sprintf("• Спред входа: %.2f%%\n", spread))
-	notional := price * amount * state.Contract.ContractSize
-	builder.WriteString(fmt.Sprintf("• Сумма входа: %.2f USDT\n", notional))
-	builder.WriteString(fmt.Sprintf("• Плечо: x%d\n", b.cfg.Leverage))
-	if line := b.balanceLine(); line != "" {
-		builder.WriteString(line)
-	}
+	builder.WriteString(fmt.Sprintf("Баланс: %.2f USDT\n", balance))
 	return builder.String()
 }
 
-func (b *Bot) formatCloseMessage(state *SymbolState, pos *Position, exitPrice, exitSpread float64, reason string, pnl float64) string {
+func (b *Bot) formatCloseMessage(state *SymbolState, pos *Position, exitPrice, exitSpread float64, pnl float64, balance float64) string {
 	var builder strings.Builder
 	emoji := "❌"
 	if pnl >= 0 {
@@ -547,32 +547,27 @@ func (b *Bot) formatCloseMessage(state *SymbolState, pos *Position, exitPrice, e
 	}
 	builder.WriteString(fmt.Sprintf("%s Закрыт %s\n", emoji, strings.ToUpper(string(pos.Direction))))
 	builder.WriteString(fmt.Sprintf("• Инструмент: %s\n", state.RestSymbol))
-	builder.WriteString(fmt.Sprintf("• Размер: %.4f\n", pos.Amount))
 	builder.WriteString(fmt.Sprintf("• Вход: %.6f\n", pos.EntryPrice))
 	builder.WriteString(fmt.Sprintf("• Выход: %.6f\n", exitPrice))
 	builder.WriteString(fmt.Sprintf("• Спред входа: %.2f%%\n", pos.EntrySpread))
 	builder.WriteString(fmt.Sprintf("• Спред выхода: %.2f%%\n", exitSpread))
-	entryNotional := pos.EntryPrice * pos.Amount * state.Contract.ContractSize
-	exitNotional := exitPrice * pos.Amount * state.Contract.ContractSize
-	builder.WriteString(fmt.Sprintf("• Сумма входа: %.2f USDT\n", entryNotional))
-	builder.WriteString(fmt.Sprintf("• Сумма выхода: %.2f USDT\n", exitNotional))
 	change := (exitPrice - pos.EntryPrice) / pos.EntryPrice * 100
 	if pos.Direction == directionShort {
 		change = -change
 	}
 	builder.WriteString(fmt.Sprintf("• PnL: %+.4f USDT (%+.3f%%)\n", pnl, change))
-	builder.WriteString(fmt.Sprintf("• Причина: %s\n", reason))
-	if line := b.balanceLine(); line != "" {
-		builder.WriteString(line)
+	builder.WriteString(fmt.Sprintf("Баланс: %.2f USDT\n", balance))
+	if delta, percent := b.totalPnL(); b.tracker != nil {
+		builder.WriteString(fmt.Sprintf("Общий PNL: %+.2f USDT (%+.1f%%)\n", delta, percent))
 	}
 	return builder.String()
 }
 
-func (b *Bot) balanceLine() string {
+func (b *Bot) totalPnL() (float64, float64) {
 	if b.tracker == nil {
-		return ""
+		return 0, 0
 	}
-	return fmt.Sprintf("Баланс: %.2f USDT\n", b.tracker.CurrentBalance())
+	return b.tracker.TotalPnL()
 }
 
 func (b *Bot) submitOrderWithScaling(ctx context.Context, state *SymbolState, order mexc.MarketOrder, submit func(context.Context, mexc.MarketOrder) (*mexc.SubmitOrderResponse, error)) (*mexc.SubmitOrderResponse, error) {
@@ -625,4 +620,49 @@ func (b *Bot) shouldScaleOrder(err error) bool {
 		}
 	}
 	return false
+}
+
+func (b *Bot) adjustEntryPrice(price float64, dir Direction) float64 {
+	offset := b.cfg.EntryOffsetPercent / 100
+	if offset <= 0 {
+		return price
+	}
+	if dir == directionLong {
+		return price * (1 - offset)
+	}
+	return price * (1 + offset)
+}
+
+func (b *Bot) adjustExitPrice(price float64, dir Direction) float64 {
+	offset := b.cfg.EntryOffsetPercent / 100
+	if offset <= 0 {
+		return price
+	}
+	if dir == directionLong {
+		return price * (1 + offset)
+	}
+	return price * (1 - offset)
+}
+
+func (b *Bot) refreshBalance() float64 {
+	if b.client == nil {
+		if b.tracker != nil {
+			return b.tracker.CurrentBalance()
+		}
+		return 0
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	balance, err := b.client.GetAccountBalance(ctx, b.cfg.BalanceCurrency)
+	if err != nil {
+		log.Printf("failed to fetch account balance: %v", err)
+		if b.tracker != nil {
+			return b.tracker.CurrentBalance()
+		}
+		return 0
+	}
+	if b.tracker != nil {
+		b.tracker.UpdateBalance(balance)
+	}
+	return balance
 }

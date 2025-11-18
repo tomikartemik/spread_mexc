@@ -115,6 +115,23 @@ func (p *PnLTracker) CurrentBalance() float64 {
 	return p.balance
 }
 
+func (p *PnLTracker) UpdateBalance(value float64) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.balance = value
+}
+
+func (p *PnLTracker) TotalPnL() (float64, float64) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	change := p.balance - p.initialBalance
+	percent := 0.0
+	if p.initialBalance > 0 {
+		percent = change / p.initialBalance * 100
+	}
+	return change, percent
+}
+
 func nextReportTime(now time.Time) time.Time {
 	loc := now.Location()
 	next := time.Date(now.Year(), now.Month(), now.Day(), 1, 0, 0, 0, loc)
