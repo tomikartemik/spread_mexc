@@ -625,6 +625,7 @@ func (b *Bot) submitOrderWithScaling(ctx context.Context, state *SymbolState, or
 		if err == nil && (resp == nil || resp.Success) {
 			return resp, nil
 		}
+		b.logSubmitError(state, order, err)
 		if !b.shouldScaleOrder(err) || attempt == maxAttempts {
 			if err != nil {
 				return resp, err
@@ -661,6 +662,21 @@ func (b *Bot) shouldScaleOrder(err error) bool {
 		}
 	}
 	return false
+}
+
+func (b *Bot) logSubmitError(state *SymbolState, order mexc.MarketOrder, err error) {
+	if err == nil {
+		log.Printf("%s order rejected: unknown reason", state.MexcSymbol)
+		return
+	}
+	switch e := err.(type) {
+	case *mexc.OrderError:
+		log.Printf("%s order rejected: %s", state.MexcSymbol, e.Msg)
+	case *mexc.StatusError:
+		log.Printf("%s order rejected: http %d %s", state.MexcSymbol, e.Code, e.Body)
+	default:
+		log.Printf("%s order rejected (%d %.6f): %v", state.MexcSymbol, order.Side, order.Price, err)
+	}
 }
 
 func (b *Bot) adjustEntryPrice(price float64, dir Direction) float64 {
