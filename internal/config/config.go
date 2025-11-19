@@ -46,6 +46,7 @@ type Settings struct {
 	MexcPriceWorkers    int
 	MexcPriceMaxRetries int
 	MexcPriceRetryDelay time.Duration
+	MexcPriceBatchSize  int
 	DebugPrices         bool
 	Symbols             []ResolvedSymbol
 	Telegram            *TelegramSettings
@@ -126,6 +127,7 @@ func Load() (Settings, error) {
 	if cfg.MexcPriceRetryDelay <= 0 {
 		cfg.MexcPriceRetryDelay = 500 * time.Millisecond
 	}
+	cfg.MexcPriceBatchSize = intFromEnv("MEXC_PRICE_BATCH_SIZE", 0)
 	cfg.DebugPrices = boolFromEnv("ARBITRAGE_DEBUG_PRICES", false)
 
 	symbols, err := loadSymbols()

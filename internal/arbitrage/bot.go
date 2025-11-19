@@ -149,9 +149,22 @@ func (b *Bot) Run(ctx context.Context) error {
 }
 
 func (b *Bot) mexcPriceLoop(ctx context.Context) error {
-	if err := b.refreshMexcPrices(ctx); err != nil {
+	total := len(b.states)
+	if total == 0 {
+		<-ctx.Done()
+		return ctx.Err()
+	}
+	batchSize := b.cfg.MexcPriceBatchSize
+	if batchSize <= 0 || batchSize > total {
+		batchSize = total
+	}
+	start := 0
+
+	targets, next := b.batchTargets(start, batchSize)
+	if err := b.refreshMexcPrices(ctx, targets); err != nil {
 		log.Printf("initial price fetch failed: %v", err)
 	}
+	start = next
 	ticker := time.NewTicker(b.cfg.MexcPollInterval)
 	defer ticker.Stop()
 	for {
@@ -159,17 +172,45 @@ func (b *Bot) mexcPriceLoop(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-ticker.C:
-			if err := b.refreshMexcPrices(ctx); err != nil {
+			targets, next := b.batchTargets(start, batchSize)
+			if err := b.refreshMexcPrices(ctx, targets); err != nil {
 				log.Printf("mexc price refresh failed: %v", err)
 			}
+			start = next
 		}
 	}
 }
 
-func (b *Bot) refreshMexcPrices(ctx context.Context) error {
+func (b *Bot) batchTargets(start, size int) ([]*SymbolState, int) {
+	total := len(b.states)
+	if total == 0 {
+		return nil, 0
+	}
+	if size <= 0 || size >= total {
+		return b.states, 0
+	}
+	if start >= total {
+		start = 0
+	}
+	end := start + size
+	if end > total {
+		end = total
+	}
+	targets := b.states[start:end]
+	next := end
+	if next >= total {
+		next = 0
+	}
+	return targets, next
+}
+
+func (b *Bot) refreshMexcPrices(ctx context.Context, targets []*SymbolState) error {
+	if len(targets) == 0 {
+		return nil
+	}
 	workerCount := b.cfg.MexcPriceWorkers
-	if workerCount > len(b.states) {
-		workerCount = len(b.states)
+	if workerCount > len(targets) {
+		workerCount = len(targets)
 	}
 	if workerCount < 1 {
 		workerCount = 1
@@ -195,7 +236,7 @@ func (b *Bot) refreshMexcPrices(ctx context.Context) error {
 	}
 
 sendLoop:
-	for _, state := range b.states {
+	for _, state := range targets {
 		select {
 		case <-ctx.Done():
 			break sendLoop
