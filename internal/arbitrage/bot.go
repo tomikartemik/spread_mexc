@@ -622,13 +622,17 @@ func (b *Bot) submitOrderWithScaling(ctx context.Context, state *SymbolState, or
 
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		resp, err := submit(ctx, order)
-		if err == nil && (resp == nil || resp.Success) {
+		callErr := err
+		if callErr == nil && resp != nil && !resp.Success {
+			callErr = &mexc.OrderError{Msg: resp.Msg}
+		}
+		if callErr == nil && (resp == nil || resp.Success) {
 			return resp, nil
 		}
-		b.logSubmitError(state, order, err)
-		if !b.shouldScaleOrder(err) || attempt == maxAttempts {
-			if err != nil {
-				return resp, err
+		b.logSubmitError(state, order, callErr)
+		if !b.shouldScaleOrder(callErr) || attempt == maxAttempts {
+			if callErr != nil {
+				return resp, callErr
 			}
 			return resp, fmt.Errorf("mexc rejected order")
 		}
@@ -666,12 +670,16 @@ func (b *Bot) shouldScaleOrder(err error) bool {
 
 func (b *Bot) logSubmitError(state *SymbolState, order mexc.MarketOrder, err error) {
 	if err == nil {
-		log.Printf("%s order rejected: unknown reason", state.MexcSymbol)
+		log.Printf("%s order rejected: unknown reason (side %d price %.6f vol %.6f)", state.MexcSymbol, order.Side, order.Price, order.Volume)
 		return
 	}
 	switch e := err.(type) {
 	case *mexc.OrderError:
-		log.Printf("%s order rejected: %s", state.MexcSymbol, e.Msg)
+		msg := e.Msg
+		if msg == "" {
+			msg = "no message"
+		}
+		log.Printf("%s order rejected: %s", state.MexcSymbol, msg)
 	case *mexc.StatusError:
 		log.Printf("%s order rejected: http %d %s", state.MexcSymbol, e.Code, e.Body)
 	default:
